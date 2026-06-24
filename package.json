@@ -1,0 +1,15 @@
+{
+  "name": "mahjong-coach",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Learn and play American (NMJL-style) Mahjong — teaching mode + pass-and-play with 2 AI players.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  }
+}
