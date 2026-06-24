@@ -2,6 +2,8 @@ import './styles.css';
 import { el, mount } from './ui/dom.js';
 import { tileEl } from './ui/tile.js';
 import { buildLearnScreen, buildCardScreen, openRulesOverlay } from './tutorial/tutorial.js';
+import { buildCardsScreen } from './ui/cards.js';
+import { activeCard } from './data/cards.js';
 import { GameController } from './ui/controller.js';
 
 const app = document.getElementById('app');
@@ -19,14 +21,17 @@ function showMenu() {
       el('button', { class: 'btn primary big', onClick: showSetup }, '▶  Play a Game'),
       el('button', { class: 'btn big', onClick: showLearn }, '🎓  Learn to Play'),
       el('button', { class: 'btn big', onClick: showCard }, '🃏  Browse the Card'),
+      el('button', { class: 'btn big', onClick: showCards }, '🛠  My Cards  (add your own)'),
       el('button', { class: 'btn big', onClick: () => openRulesOverlay() }, '📖  Rules Reference'),
     ),
-    el('p', { class: 'footnote' }, 'Built for a real game night. New to mahjong? Tap “Learn to Play” first. Uses original practice hands in the NMJL style — not the copyrighted League card.'),
+    el('p', { class: 'activecard' }, 'Active card: ', el('b', {}, activeCard().name), ' — change in “My Cards.”'),
+    el('p', { class: 'footnote' }, 'Built for a real game night. New to mahjong? Tap “Learn to Play” first. Have your own official card? Add it under “My Cards.”'),
   ));
 }
 
 function showLearn() { mount(app, buildLearnScreen(() => showSetup(), showMenu)); }
 function showCard() { mount(app, buildCardScreen(showMenu)); }
+function showCards() { buildCardsScreen(app, showMenu); }
 
 // ----- setup ---------------------------------------------------------------
 function showSetup() {
@@ -45,6 +50,7 @@ function showSetup() {
       ),
       el('div', { class: 'setupcard' },
         el('p', { class: 'muted' }, 'Two of you share this device (pass it at each turn) and play against two computer players. The humans sit across from each other (East & West).'),
+        el('p', { class: 'hint' }, '🃏 Playing with: ', el('b', {}, activeCard().name), '. Add your official card under “My Cards.”'),
         el('div', { class: 'field' },
           el('label', {}, 'Player 1 — East seat'),
           el('input', { id: 'n1', class: 'inp', value: cfg.name1, maxlength: '14', oninput: (e) => (cfg.name1 = e.target.value) }),

@@ -246,6 +246,45 @@ body {
 .rules h3 { color: var(--gold); margin: 16px 0 4px; }
 .rules .muted b { color: #fff; }
 
+/* ---------- card manager + editor ---------- */
+.activecard { color: var(--muted); font-size: .88rem; text-align: center; }
+.activecard b { color: var(--gold); }
+.cardlist { margin-top: 14px; }
+.cardrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--panel-b); border-radius: 12px; padding: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.cardrow.active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.crname { font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.crsub { color: var(--muted); font-size: .85rem; }
+.cractions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.spacer { flex: 1; }
+.hctop .spacer { flex: 1; }
+
+.handeditor { width: min(820px, 96vw); }
+.hemeta { display: flex; flex-wrap: wrap; gap: 10px; }
+.hemeta .field { flex: 1 1 180px; }
+.hemeta .field.narrow { flex: 0 0 96px; }
+.helabel { font-weight: 800; color: var(--gold); margin: 14px 0 6px; }
+.hepreview { display: flex; flex-wrap: wrap; gap: 10px; min-height: 50px; align-items: center; background: #00000022; border: 1px solid var(--panel-b); border-radius: 12px; padding: 10px; }
+.hepreview .grp { position: relative; background: #00000026; padding: 5px 6px; border-radius: 8px; border: 1px solid var(--panel-b); }
+.grpdel { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; border: none; background: var(--crak); color: #fff; cursor: pointer; font-size: .7rem; line-height: 1; }
+.hestatus { margin-top: 8px; padding: 8px 11px; border-radius: 9px; font-weight: 600; font-size: .9rem; }
+.hestatus.ok { background: #2f8f5733; border: 1px solid var(--bam); }
+.hestatus.bad { background: #c0392b22; border: 1px solid var(--crak); }
+.builder { background: #00000022; border: 1px solid var(--panel-b); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.brow { display: flex; gap: 10px; align-items: flex-start; }
+.blab { width: 44px; font-weight: 800; font-size: .82rem; padding-top: 7px; flex: 0 0 auto; }
+.numpad { display: flex; flex-wrap: wrap; gap: 5px; }
+.specialrow { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.tilebtn { background: #ffffff10; border: 1px solid var(--panel-b); border-radius: 9px; padding: 5px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tilebtn.wide { flex-direction: row; }
+.tilebtn.on { background: var(--gold); border-color: var(--gold-d); }
+.tbl { font-size: .7rem; font-weight: 700; color: inherit; }
+.swatchrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.swatch { padding: 8px 12px; border-radius: 9px; border: 2px solid transparent; font-weight: 700; cursor: pointer; color: #fff; }
+.sw-A { background: #2f8f57cc; } .sw-B { background: #c0392bcc; } .sw-C { background: #2b6fb3cc; }
+.swatch.on { border-color: #fff; }
+.triple { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.segbtn.sm { padding: 6px 10px; font-size: .82rem; }
+
 @media (max-width: 720px) {
   .table { grid-template-columns: 64px 1fr 64px; gap: 6px; padding: 8px; }
   .tile { width: 46px; height: 62px; }

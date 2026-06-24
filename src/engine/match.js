@@ -4,7 +4,7 @@
 // AI and the on-screen coach both use.
 // ---------------------------------------------------------------------------
 import { SUITS, SUIT_PREFIX, DRAGON_OF_SUIT } from '../data/tiles.js';
-import { CARD } from '../data/card.js';
+import { activeHands } from '../data/cards.js';
 
 // distinct-suit assignments for the slots a hand uses
 function suitAssignments(slots) {
@@ -95,7 +95,7 @@ export function matchHand(tiles, hand) {
 // out Concealed hands.
 export function bestWin(tiles, { hasExposures = false } = {}) {
   let best = null;
-  for (const hand of CARD) {
+  for (const hand of activeHands()) {
     if (hand.concealed && hasExposures) continue;
     const m = matchHand(tiles, hand);
     if (m && (!best || hand.value > best.hand.value)) best = m;
@@ -139,7 +139,7 @@ export function coverage(tiles, hand) {
 
 // Rank every hand by closeness to `tiles`. Returns sorted [{hand, cover, away}].
 export function rankHands(tiles, { hasExposures = false } = {}) {
-  const ranked = CARD
+  const ranked = activeHands()
     .filter((h) => !(h.concealed && hasExposures))
     .map((h) => {
       const cover = coverage(tiles, h);
@@ -213,4 +213,59 @@ export function exampleGroups(hand) {
     const id = resolveId(grp.t, assign);
     return { ids: new Array(grp.c).fill(id), size: grp.c };
   });
+}
+
+// ----- helpers for the card editor (user-entered hands) --------------------
+
+// Which suit-slots (A/B/C) does this set of groups reference?
+export function slotsFromGroups(groups) {
+  const s = new Set();
+  for (const g of groups) if (g.t.type === 'num' || g.t.type === 'dragonOf') s.add(g.t.slot);
+  return [...s].sort();
+}
+
+// A compact NMJL-ish text pattern, e.g. "FFFF 222 222 222".
+export function groupsToPattern(groups) {
+  const tok = (t) => ({
+    num: String(t.n),
+    wind: { wn: 'N', we: 'E', ww: 'W', ws: 'S' }[t.id],
+    dragon: { dr: 'R', dg: 'G', dw: '0' }[t.id],
+    dragonOf: 'D',
+    flower: 'F',
+  }[t.type] || '?');
+  return groups.map((g) => tok(g.t).repeat(g.c)).join(' ');
+}
+
+// Validate a user-entered hand. Returns { ok, errors[], slots, tiles }.
+export function validateHand(handLike) {
+  const groups = handLike.groups || [];
+  const slots = slotsFromGroups(groups);
+  const hand = { ...handLike, slots };
+  const errors = [];
+
+  if (!groups.length) { errors.push('Add at least one group.'); return { ok: false, errors, slots, tiles: [] }; }
+
+  const tiles = exampleGroups(hand).flatMap((g) => g.ids);
+  if (tiles.length !== 14) errors.push(`This hand has ${tiles.length} tiles — every hand must total exactly 14.`);
+
+  // buildable from a real set? cap reals (flowers 8, else 4); overflow -> jokers
+  const need = {};
+  for (const t of tiles) need[t] = (need[t] || 0) + 1;
+  let jokers = 0;
+  const legal = [];
+  for (const [id, c] of Object.entries(need)) {
+    const cap = id === 'fl' ? 8 : 4;
+    const reals = Math.min(c, cap);
+    for (let i = 0; i < reals; i++) legal.push(id);
+    jokers += Math.max(0, c - reals);
+  }
+  for (let i = 0; i < jokers; i++) legal.push('jk');
+  if (jokers > 8) errors.push(`This hand would need ${jokers} jokers (only 8 exist). Reduce repeated tiles.`);
+
+  if (tiles.length === 14 && jokers <= 8 && !matchHand(legal, hand)) {
+    errors.push('These tiles can’t form a legal hand — likely a Pair/Single needs a tile that runs out (you only have 4 of each).');
+  }
+  if (!(handLike.value > 0)) errors.push('Set a point value (e.g. 25).');
+
+  return { ok: errors.length === 0, errors, slots, tiles };
 }

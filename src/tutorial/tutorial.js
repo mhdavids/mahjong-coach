@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 import { el, clear, mount } from '../ui/dom.js';
 import { tileRow, tileEl } from '../ui/tile.js';
-import { CARD, CATEGORIES } from '../data/card.js';
+import { activeCard } from '../data/cards.js';
 import { exampleGroups, handPlan } from '../engine/match.js';
 import { tileInfo } from '../data/tiles.js';
 
@@ -34,36 +34,38 @@ function overlay(title, contentNode, { wide = false } = {}) {
 // CARD VIEWER  (also used live during play; pass current tiles for progress)
 // ===========================================================================
 export function cardContent(tiles = null, hasExposures = false) {
+  const card = activeCard();
+  const hands = card.hands;
   const wrap = el('div', { class: 'cardview' });
-  wrap.append(el('p', { class: 'note' },
-    '⚠️ This is a PRACTICE card — original hands in the NMJL style, not the official League card (which is copyrighted and changes every April). Learn the skills here; read the real hands off the card you buy for game night.'));
+  wrap.append(el('p', { class: 'note' }, card.builtin
+    ? '⚠️ This is a PRACTICE card — original hands in the NMJL style, not the official League card (which is copyrighted and changes every April). Learn the skills here; read the real hands off the card you buy for game night.'
+    : `📋 Your card: “${card.name}”. Entered for private practice and stored only in this browser. Manage it under “My Cards.”`));
 
-  for (const cat of CATEGORIES) {
-    const hands = CARD.filter((h) => h.cat === cat);
-    if (!hands.length) continue;
+  const cats = [...new Set(hands.map((h) => h.cat || 'Hands'))];
+  if (!hands.length) wrap.append(el('p', { class: 'muted' }, 'This card has no hands yet — add some in the Card Editor.'));
+  for (const cat of cats) {
     wrap.append(el('h3', { class: 'cat' }, cat));
-    for (const h of hands) {
+    for (const h of hands.filter((x) => (x.cat || 'Hands') === cat)) {
       const plan = tiles ? handPlan(tiles, h) : null;
-      const row = el('div', { class: 'handcard' },
+      wrap.append(el('div', { class: 'handcard' },
         el('div', { class: 'hctop' },
-          el('span', { class: 'hcname' }, h.name),
-          diffBadge(h.difficulty),
+          el('span', { class: 'hcname' }, h.name || '(unnamed)'),
+          h.difficulty ? diffBadge(h.difficulty) : null,
           el('span', { class: 'hcval' }, `${h.value} pts`),
           h.concealed ? el('span', { class: 'tag c' }, 'Concealed') : el('span', { class: 'tag x' }, 'Exposable'),
           plan ? el('span', { class: 'tag away' + (plan.away <= 3 ? ' close' : '') }, `${plan.away} away`) : null,
         ),
-        el('div', { class: 'hcpat' }, h.pattern),
+        h.pattern ? el('div', { class: 'hcpat' }, h.pattern) : null,
         handExample(h),
-        el('div', { class: 'hctip' }, h.tip),
-      );
-      wrap.append(row);
+        h.tip ? el('div', { class: 'hctip' }, h.tip) : null,
+      ));
     }
   }
   return wrap;
 }
 
 export function openCardOverlay(tiles = null, hasExposures = false) {
-  overlay(tiles ? '🃏 The Card — your progress' : '🃏 The Practice Card', cardContent(tiles, hasExposures), { wide: true });
+  overlay(`🃏 ${activeCard().name}` + (tiles ? ' — your progress' : ''), cardContent(tiles, hasExposures), { wide: true });
 }
 
 // ===========================================================================
@@ -177,7 +179,7 @@ export function buildCardScreen(onBack) {
   return el('div', { class: 'screen' },
     el('div', { class: 'lhead' },
       el('button', { class: 'btn ghost sm', onClick: onBack }, '← Menu'),
-      el('h2', { class: 'screentitle' }, '🃏 The Practice Card'),
+      el('h2', { class: 'screentitle' }, `🃏 ${activeCard().name}`),
       el('button', { class: 'btn ghost sm', onClick: () => openRulesOverlay() }, '📖 Rules'),
     ),
     cardContent(),
