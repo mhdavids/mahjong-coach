@@ -84,4 +84,18 @@ function startGame() {
   ctrl.run();
 }
 
+// One-time hint on iPhone/iPad Safari: install to the home screen for a
+// full-screen, app-like experience.
+function maybeInstallHint() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if (!isIOS || standalone || localStorage.getItem('mahjong.a2hs') === 'dismissed') return;
+  const banner = el('div', { class: 'a2hs' },
+    el('div', { class: 'txt' }, 'Tip: tap ', el('b', {}, 'Share'), ' then ', el('b', {}, '“Add to Home Screen”'), ' to play full-screen like an app.'),
+    el('button', { class: 'btn sm primary', onClick: () => { localStorage.setItem('mahjong.a2hs', 'dismissed'); banner.remove(); } }, 'Got it'),
+  );
+  document.body.append(banner);
+}
+
 showMenu();
+maybeInstallHint();

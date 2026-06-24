@@ -246,6 +246,22 @@ body {
 .rules h3 { color: var(--gold); margin: 16px 0 4px; }
 .rules .muted b { color: #fff; }
 
+/* ---------- iOS safe areas (notch / home indicator when installed) ---------- */
+.topbar { padding-top: calc(9px + env(safe-area-inset-top)); padding-left: calc(14px + env(safe-area-inset-left)); padding-right: calc(14px + env(safe-area-inset-right)); }
+.screen { padding-top: calc(22px + env(safe-area-inset-top)); }
+.menu { padding-top: max(6vh, calc(env(safe-area-inset-top) + 18px)); }
+.dock { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.overlay { padding-top: max(16px, calc(env(safe-area-inset-top) + 8px)); padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px)); }
+
+/* ---------- install hint ---------- */
+.a2hs { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 70;
+  background: linear-gradient(#173f31, #102e24); border: 1px solid var(--gold-d); border-radius: 14px; padding: 12px 14px;
+  box-shadow: 0 12px 40px #0008; display: flex; align-items: center; gap: 12px; max-width: 520px; margin: 0 auto; }
+.a2hs .txt { flex: 1; font-size: .9rem; line-height: 1.4; }
+.a2hs .txt b { color: var(--gold); }
+.a2hs button { flex: 0 0 auto; }
+.codearea { width: 100%; min-height: 120px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .78rem; line-height: 1.4; resize: vertical; word-break: break-all; }
+
 /* ---------- card manager + editor ---------- */
 .activecard { color: var(--muted); font-size: .88rem; text-align: center; }
 .activecard b { color: var(--gold); }

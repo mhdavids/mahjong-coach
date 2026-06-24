@@ -1,0 +1,16 @@
+{
+  "name": "Mahjong Coach",
+  "short_name": "Mahjong",
+  "description": "Learn and play American (NMJL-style) Mahjong — with a built-in coach and two AI opponents.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c3b2e",
+  "theme_color": "#0c3b2e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

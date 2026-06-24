@@ -66,3 +66,24 @@ export function importCard(json) {
   upsertCard(card);
   return card;
 }
+
+// Share a card as a copy-paste CODE (so it can move between your own devices
+// without a file). Still 100% local — nothing leaves the device until you
+// choose to copy/paste it yourself.
+function b64encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function b64decode(b64) {
+  const bin = atob(b64.trim());
+  return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+}
+export function cardToCode(id) {
+  const c = getCard(id);
+  return 'MJC1:' + b64encode(JSON.stringify({ name: c.name, hands: c.hands }));
+}
+export function cardFromCode(code) {
+  const raw = String(code).trim().replace(/^MJC1:/, '');
+  return importCard(b64decode(raw));
+}

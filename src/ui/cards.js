@@ -8,7 +8,7 @@ import { tileEl, tileRow } from './tile.js';
 import { confirmBox, chooseBox, toast } from './modal.js';
 import {
   allCards, getCard, activeCardId, setActiveCard, upsertCard, deleteCard,
-  duplicateCard, newId, newHandId, exportCard, importCard,
+  duplicateCard, newId, newHandId, exportCard, importCard, cardToCode, cardFromCode,
 } from '../data/cards.js';
 import { validateHand, slotsFromGroups, groupsToPattern, exampleGroups } from '../engine/match.js';
 
@@ -42,6 +42,40 @@ function download(filename, text) {
   document.body.append(a); a.click(); a.remove();
 }
 
+function shareCodeModal(name, code) {
+  const ta = el('textarea', { class: 'inp codearea', readonly: true }, code);
+  const ov = el('div', { class: 'overlay' },
+    el('div', { class: 'card' },
+      el('h2', {}, `Share “${name}”`),
+      el('p', { class: 'muted' }, 'Copy this code, then on your other device open My Cards → “Load from code.” It stays private — nothing is uploaded; you’re just moving text you control.'),
+      ta,
+      el('div', { class: 'row gap mt' },
+        el('button', { class: 'btn', onClick: () => ov.remove() }, 'Close'),
+        el('button', { class: 'btn primary', onClick: async () => { try { await navigator.clipboard.writeText(code); toast('Code copied'); } catch { ta.select(); toast('Select-all + copy the code'); } } }, 'Copy code'),
+      ),
+    ),
+  );
+  document.getElementById('modal-root').append(ov);
+  setTimeout(() => { ta.focus(); ta.select(); }, 30);
+}
+
+function loadCodeModal(after) {
+  const ta = el('textarea', { class: 'inp codearea', placeholder: 'Paste a card code here…' });
+  const ov = el('div', { class: 'overlay' },
+    el('div', { class: 'card' },
+      el('h2', {}, 'Load card from code'),
+      el('p', { class: 'muted' }, 'Paste a code you copied from another device.'),
+      ta,
+      el('div', { class: 'row gap mt' },
+        el('button', { class: 'btn', onClick: () => ov.remove() }, 'Cancel'),
+        el('button', { class: 'btn primary', onClick: () => { try { const c = cardFromCode(ta.value); ov.remove(); toast(`Loaded “${c.name}”`); after && after(); } catch { toast('Could not read that code', 2400); } } }, 'Load'),
+      ),
+    ),
+  );
+  document.getElementById('modal-root').append(ov);
+  setTimeout(() => ta.focus(), 30);
+}
+
 // ===========================================================================
 // MANAGER SCREEN
 // ===========================================================================
@@ -62,6 +96,7 @@ export function buildCardsScreen(app, onBack) {
           const card = { id: newId(), name: name || 'My Card', hands: [] };
           upsertCard(card); editCard(app, card.id, () => buildCardsScreen(app, onBack));
         } }, '＋ New card'),
+        el('button', { class: 'btn', onClick: () => loadCodeModal(render) }, '🔑 Load from code'),
         el('button', { class: 'btn', onClick: () => importFile(render) }, '⬆ Import (.json)'),
       ),
       el('div', { class: 'cardlist' }, allCards().map((c) => el('div', { class: 'cardrow' + (c.id === activeId ? ' active' : '') },
@@ -73,6 +108,7 @@ export function buildCardsScreen(app, onBack) {
           c.id === activeId ? el('span', { class: 'muted sm' }, 'In use') : el('button', { class: 'btn sm primary', onClick: () => { setActiveCard(c.id); toast(`Now playing with “${c.name}”`); render(); } }, 'Use this'),
           c.builtin ? null : el('button', { class: 'btn sm', onClick: () => editCard(app, c.id, () => buildCardsScreen(app, onBack)) }, 'Edit'),
           el('button', { class: 'btn sm', onClick: async () => { const n = await promptBox({ title: 'Duplicate card', label: 'Name for the copy:', value: c.name + ' (copy)' }); if (n == null) return; duplicateCard(c.id, n); render(); } }, 'Duplicate'),
+          el('button', { class: 'btn sm', onClick: () => shareCodeModal(c.name, cardToCode(c.id)) }, 'Share'),
           el('button', { class: 'btn sm', onClick: () => download(c.name.replace(/\s+/g, '-') + '.json', exportCard(c.id)) }, 'Export'),
           c.builtin ? null : el('button', { class: 'btn sm danger', onClick: async () => { if (await confirmBox({ title: `Delete “${c.name}”?`, body: 'This removes the card from this device. Export it first if you want a backup.', yes: 'Delete', no: 'Keep', icon: '🗑' })) { deleteCard(c.id); render(); } } }, 'Delete'),
         ),
