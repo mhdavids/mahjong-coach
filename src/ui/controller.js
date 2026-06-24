@@ -330,7 +330,7 @@ export class GameController {
     const g = this.game;
     const p = g.players[idx];
     const isViewer = this.viewer === idx && where === 'bottom';
-    const isTurn = g.turn === idx;
+    const isTurn = g.turn === idx && g.phase === 'play';
     const box = el('div', { class: `seat seat-${where}` + (isTurn ? ' turn' : '') });
 
     const head = el('div', { class: 'seathead' },
