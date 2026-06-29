@@ -275,6 +275,9 @@ body {
 .hctop .spacer { flex: 1; }
 
 .handeditor { width: min(820px, 96vw); }
+.quicktype { background: #00000026; border: 1px solid var(--gold-d); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; }
+.quicktype .row { align-items: stretch; }
+.quicktype .inp { flex: 1; }
 .hemeta { display: flex; flex-wrap: wrap; gap: 10px; }
 .hemeta .field { flex: 1 1 180px; }
 .hemeta .field.narrow { flex: 0 0 96px; }

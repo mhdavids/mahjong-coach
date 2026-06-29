@@ -11,6 +11,7 @@ import {
   duplicateCard, newId, newHandId, exportCard, importCard, cardToCode, cardFromCode,
 } from '../data/cards.js';
 import { validateHand, slotsFromGroups, groupsToPattern, exampleGroups } from '../engine/match.js';
+import { parseHandLine } from '../engine/parseHand.js';
 
 const deep = (x) => JSON.parse(JSON.stringify(x));
 const SECTIONS = ['2026', '2468', 'Like Numbers', 'Addition Hands', 'Quints', 'Consecutive Run', '13579', 'Winds - Dragons', '369', 'Singles and Pairs'];
@@ -175,6 +176,7 @@ function editCard(app, cardId, onBack) {
 function openHandEditor(card, existing, onClose) {
   const state = existing ? deep(existing) : { name: '', cat: '', value: 25, concealed: false, groups: [] };
   const draft = { c: 3, kind: 'num', n: 1, slot: 'A', dragonId: 'dr', windId: 'wn', triple: false };
+  let quickVal = '';
   const root = document.getElementById('modal-root');
   const ov = el('div', { class: 'overlay' });
   root.append(ov);
@@ -203,6 +205,16 @@ function openHandEditor(card, existing, onClose) {
   function render() {
     const v = validateHand(state);
     const ex = state.groups.length ? exampleGroups({ ...state, slots: v.slots }) : [];
+
+    const qtInput = el('input', { class: 'inp', placeholder: '⚡ Quick type:  222a 222b 222c FFF DDc =30x', value: quickVal, oninput: (e) => (quickVal = e.target.value), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); doFill(); } } });
+    const doFill = () => {
+      const r = parseHandLine(qtInput.value);
+      if (r.error) { toast(r.error, 2800); return; }
+      state.groups = r.groups;
+      if (r.value != null) state.value = r.value;
+      state.concealed = r.concealed;
+      render();
+    };
 
     const numPad = el('div', { class: 'numpad' }, [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
       el('button', { class: 'tilebtn' + (draft.kind === 'num' && draft.n === n ? ' on' : ''), onClick: () => { draft.kind = 'num'; draft.n = n; render(); } },
@@ -234,6 +246,12 @@ function openHandEditor(card, existing, onClose) {
 
     const node = el('div', { class: 'card wide scroll handeditor' },
       el('div', { class: 'ovhead' }, el('h2', {}, existing ? 'Edit hand' : 'New hand'), el('button', { class: 'btn ghost sm', onClick: close }, '✕ Close')),
+
+      // quick type
+      el('div', { class: 'quicktype' },
+        el('div', { class: 'row gap' }, qtInput, el('button', { class: 'btn primary', onClick: doFill }, 'Fill ▸')),
+        el('div', { class: 'hint' }, 'Repeat a tile for count (222 = Pung). Suit = trailing a/b/c. F = Flower · 0 = Soap · N E W S = winds · Da = matching dragon. End with =25x (exposable) or =50c (concealed). Then check the tiles below and Save.'),
+      ),
 
       // meta fields
       el('div', { class: 'hemeta' },
